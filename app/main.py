@@ -9,7 +9,8 @@ import os
 def main(log=print, **kargs):
     db_path = kargs.get("db_path", None)
     conn = duckdb.connect(db_path)
-    agent = DatabaseAgent(conn, log=log)
+    special_columns = [{"table":"customers", "col": "loyalty_tier"},{"table":"orders", "col": "status"}]
+    agent = DatabaseAgent(conn, special_columns=special_columns, log=log)
     question = kargs.get("question", None)
     if question is None:
         log("No question provided. Exiting.")

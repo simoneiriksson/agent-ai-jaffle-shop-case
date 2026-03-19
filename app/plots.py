@@ -8,20 +8,20 @@ def build_plot(chart_output_dict, result, log=print):
             log("Interpreted as BAR chart with the following details:")
             log(chart_output_dict)
             fig, ax = plt.subplots()
-            x_labels = result[chart_output_dict["x"]].astype(str).tolist()
-            x_pos = np.arange(len(x_labels))
+            x_ticks = result[chart_output_dict["x"]].unique().tolist()
+            x_pos = np.arange(len(x_ticks))
 
             ax.bar(result[chart_output_dict["x"]], result[chart_output_dict["y"]])
-            ax.set_xlabel(x_labels)
+            ax.set_xlabel(chart_output_dict["xlabel"])
             ax.set_ylabel(chart_output_dict["ylabel"])
             ax.set_title(chart_output_dict["title"])
             ax.set_xticks(x_pos)
-            ax.set_xticklabels(x_labels, rotation=45, ha="right")
+            ax.set_xticklabels(x_ticks, rotation=45, ha="right")
             return fig, ax
 
         case "grouped_bar":   
             log("Interpreted as GROUPED BAR chart with the following details:")
-            pprint(chart_output_dict)
+            log(chart_output_dict)
             fig, ax = plt.subplots()
             group_labels = sorted(result[chart_output_dict["group"]].unique().tolist())
             group_pos = np.arange(len(group_labels))

@@ -11,10 +11,12 @@ Only write the SQL query, without any explanation."""
 
 def build_sql_prompt(question: str, schema_context: str, special_columns=None) -> str:
     prompt = f"""
-        You are a data analyst writing DuckDB SQL.
-
+        You are an expert data analyst who writes SQL queries to answer questions about a database. 
+        The question may contain information about plotting preferences, but you should ignore that for this prompt and focus only on writing a SQL query to answer the question.
+        The database schema is as follows:
         Schema:
         {schema_context}"""
+    
     if special_columns:
         prompt += f"""
             Some columns have special semantics:
@@ -24,6 +26,7 @@ def build_sql_prompt(question: str, schema_context: str, special_columns=None) -
 
             Instructions:
         - Use only the tables and columns listed above
+        - Do not include id-columns in the output.
         - Return a single SELECT query only
         - Do not use markdown
         - If ambiguous, return: AMBIGUOUS: <question>
@@ -35,52 +38,82 @@ def build_sql_prompt(question: str, schema_context: str, special_columns=None) -
     return prompt
 
 
-def build_presentation_type_prompt(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
-    prompt = f"""
-        You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
+# def build_presentation_type_prompt(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
+#     prompt = f"""
+#         You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
 
-        Instructions:
-        - evaluate if the pandas DataFrame extract from the SQL query is best presented as a text answer or a table
-        - If the DataFrame has 1 row and 1 column, return: PRESENTATION: TEXT
-        - If the DataFrame has more than 1 row or more than 1 column, return: PRESENTATION: TABLE
+#         Instructions:
+#         - evaluate if the pandas DataFrame extract from the SQL query is best presented as a text answer or a table
+#         - If the DataFrame has 1 row and 1 column, return: PRESENTATION: TEXT
+#         - If the DataFrame has more than 1 row or more than 1 column, return: PRESENTATION: TABLE
 
-        Schema:
-        {schema_context}
+#         Schema:
+#         {schema_context}
 
-        User question:
-        {question}
+#         User question:
+#         {question}
 
-        SQL query:
-        {sql_query}
+#         SQL query:
+#         {sql_query}
 
-        SQL result: 
-        {db_extract.to_string(index=False)}
-        """.strip()
-    return prompt
+#         SQL result: 
+#         {db_extract.head(n=20).to_string(index=False)}
+#         """.strip()
+#     return prompt
 
-def build_df_presentation_prompt(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
+# def build_df_presentation_prompt_bck(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
+#     prompt = f"""
+#     You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
+#     Instructions:
+#         - write a very short introductory text to present the data in the DataFrame, based on the user question and the SQL query 
+#         - the introductory text should contain a brief non-techical summary any methodological choices you made in writing the SQL query, such as how you interpreted ambiguous aspects of the question, and any assumptions you made.
+#         - do not include information from the table 
+#         - the data will be presented in a dataframe after the text
+#         User question:
+#         {question}
+
+#         SQL query:
+#         {sql_query}
+#     """.strip()
+#     return prompt
+
+
+
+def build_presentation_prompt_df(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
     prompt = f"""
     You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
     Instructions:
-        - write a very short text introductory text to present the data in the DataFrame, based on the user question and the SQL query 
-        - do not include information from the table 
+        - write a short introductory text to present the data in the DataFrame, based on the user question and the SQL query 
         - the data will be presented in a dataframe after the text
+        - Do not use any type of markup (e.g. markdown, html, etc.) in your response. Return plain text only.
+        The text should have three sections:
+        BRIEF: <one sentence non-technical description of the results. It should focus on explaining the numbers in the DataFrame.>
+        IN-DEPTH: <2-4 sentences non-technical summary of the results, focussing on any interesting patterns, trends, or outliers in the data. It should focus on explaining the numbers in the DataFrame.>
+        METHODOLOGY: <brief non-technical summary of any methodological choices, assumptions, or interpretations you made in writing the SQL query>
+
         User question:
         {question}
 
         SQL query:
         {sql_query}
+
+        DataFrame:
+        {db_extract.to_string(index=False)}
+
     """.strip()
     return prompt
 
-def build_text_from_dataextract_prompt(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
+
+def build_presentation_prompt_short(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
     prompt = f"""
         You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
 
         Instructions:
-        - write a text answer to the user question based on the SQL query and its result
-        - If the SQL query is AMBIGUOUS or UNANSWERABLE, return that instead of an answer
-        - If the SQL query is invalid or has an error, return: ERROR: <error message>
+        - write a short text answer to the user question based on the SQL query and its result.
+        - the text should contain a brief non-techical  summary any methodological choices you made in writing the SQL query, such as how you interpreted ambiguous aspects of the question, and any assumptions you made.
+        
+        BRIEF: <one sentence non-technical description of the results. It should focus on explaining the numbers in the DataFrame.>
+        METHODOLOGY: <brief non-technical summary of any methodological choices, assumptions, or interpretations you made in writing the SQL query>
 
         Schema:
         {schema_context}
@@ -157,7 +190,7 @@ DataFrame columns and dtypes:
 {columns}
 
 Preview rows:
-{preview_rows}
+{preview_rows.to_string(index=False)}
 """.strip()
 
 

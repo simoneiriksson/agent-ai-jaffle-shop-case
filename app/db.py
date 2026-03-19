@@ -31,15 +31,15 @@ def get_schema_summary(conn) -> str:
 def get_special_columns_content(conn, special_columns):
     special_columns_results = []
     for col in special_columns:
-        query = f"SELECT DISTINCT {col['name']} FROM {col['table']}"
+        query = f"SELECT DISTINCT {col['col']} FROM {col['table']}"
         try:
             result = execute_query(query, conn)
         except Exception as e:
-            raise ValueError(f"Error executing query for special column {col['table']}.{col['name']}: {e}")
+            raise ValueError(f"Error executing query for special column {col['table']}.{col['col']}: {e}")
 
         special_columns_results.append({
-            "column": f"{col['table']}.{col['name']}",
-            "values": result[col['name']].tolist()
+            "column": f"{col['table']}.{col['col']}",
+            "values": result[col['col']].tolist()
         })
     return special_columns_results
 
