@@ -13,7 +13,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class DatabaseAgent():
+    """
+        LLM-powered agent that translates natural-language analytics questions into SQL,
+        executes the query, and returns a text or table-style presentation with optional chart metadata.
+    """
     def __init__(self, conn, log=print, special_columns=None, temperature=1):
+        """
+            Initialize the agent with a DuckDB connection, logging callable, optional special
+            semantic columns, and generation temperature.
+
+            Raises:
+            ValueError: If OPENAI_API_KEY is not set in the environment.
+        """
         self.conn = conn
         self.log = log
         self.temperature = temperature 
@@ -29,6 +40,9 @@ class DatabaseAgent():
         self.get_schema_summary()
 
     def get_llm_response(self, prompt):
+        """
+            Send a free-form prompt to the chat-completions API and return the text response.
+        """
         try:
             response = self.client.chat.completions.create(
                 model="gpt-4o",
@@ -40,6 +54,17 @@ class DatabaseAgent():
         return response.choices[0].message.content
 
     def get_llm_response_jsonschema(self, prompt, json_schema):
+        """
+            Send a prompt to the responses API with a strict JSON schema and parse the JSON output.
+
+            Args:
+            prompt: Instruction text sent to the model.
+            json_schema: JSON schema used for constrained structured output.
+            Returns:
+            Parsed response as a dictionary.
+            Raises:
+            json.JSONDecodeError: If model output is not valid JSON.
+        """
         try:
             response = self.client.responses.create(
             model="gpt-4o",
@@ -69,14 +94,26 @@ class DatabaseAgent():
 
 
     def get_schema_summary(self):
+        """
+            Load and cache a human-readable schema summary from the connected database.
+        """
         self.schema_summary = get_schema_summary(self.conn)
         return self.schema_summary
     
     def get_special_columns_content(self, special_columns):
+        """
+            Load and cache distinct values for configured special columns.
+        """
         self.special_columns = get_special_columns_content(self.conn, special_columns)
         return self.special_columns
 
     def sql_query(self, prompt):
+        """
+            Generate SQL from a prompt, enforce read-only safety checks, and execute it.
+
+            Returns:
+            Dictionary containing success status and either query/data or structured error details.
+        """
         sql_query = self.get_llm_response(prompt)
         if sql_query.upper().startswith("AMBIGUOUS"):
             self.log(f"Generated SQL query is ambiguous. returning: {sql_query}")
@@ -101,6 +138,12 @@ class DatabaseAgent():
         return {"success": True, "sql_query": sql_query, "query_result": query_result}
 
     def __call__(self, question):
+        """
+            Run the end-to-end QA pipeline for one user question.
+
+            The method generates SQL, executes it, formats human-friendly results, and optionally
+            builds chart instructions and a Matplotlib figure for tabular outputs.
+        """
         self.log(f"Received question: {question}")
         sql_prompt = build_sql_prompt(question, self.schema_summary, self.special_columns)
         sql_response_dict = self.sql_query(sql_prompt)

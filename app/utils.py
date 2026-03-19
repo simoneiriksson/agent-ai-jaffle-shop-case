@@ -1,3 +1,6 @@
+"""
+Utility helpers for converting technical database column names to user-friendly labels.
+"""
 import pandas as pd
 
 HUMAN_COLUMN_NAMES = {
@@ -31,6 +34,9 @@ HUMAN_COLUMN_NAMES = {
 }
 
 def humanize_column_name(col: str) -> str:
+    """
+        Convert a raw column name to a readable label using known mappings or title-cased fallback.
+    """
     col = str(col).strip()
     if col in HUMAN_COLUMN_NAMES:
         return HUMAN_COLUMN_NAMES[col]
@@ -39,6 +45,9 @@ def humanize_column_name(col: str) -> str:
     return col.replace("_", " ").strip().title()
 
 def rename_columns_human(df: pd.DataFrame) -> pd.DataFrame:
+    """
+        Return a copy of a DataFrame with all columns renamed to human-friendly labels.
+    """
     df = df.copy()
     df.columns = [humanize_column_name(col) for col in df.columns]
     return df

@@ -1,8 +1,20 @@
+"""Plot-construction helpers that map chart specs to Matplotlib figures."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from pprint import pprint
 
 def build_plot(chart_output_dict, result, log=print):
+    """Build a Matplotlib chart from structured chart metadata and query results.
+
+    Args:
+        chart_output_dict: Model-produced chart specification.
+        result: pandas DataFrame containing SQL results.
+        log: Logging callable for diagnostics.
+
+    Returns:
+        Tuple of (figure, axes) for supported chart types, otherwise (None, None).
+    """
     match chart_output_dict.get("chart_type", "").lower():
         case "bar":
             log("Interpreted as BAR chart with the following details:")

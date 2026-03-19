@@ -1,5 +1,8 @@
+"""Prompt builders for SQL generation, result presentation, and chart selection."""
+
 import pandas as pd
 def build_sql_prompt_bck(question, schema_context):
+    """Legacy SQL prompt template kept for comparison/backward reference."""
     prompt = f"""You are an expert data analyst who writes SQL queries to answer questions about a database. 
     The database schema is as follows:
 {schema_context}
@@ -10,6 +13,7 @@ Only write the SQL query, without any explanation."""
 
 
 def build_sql_prompt(question: str, schema_context: str, special_columns=None) -> str:
+    """Build the SQL-generation prompt with schema context and safety instructions."""
     prompt = f"""
         You are an expert data analyst who writes SQL queries to answer questions about a database. 
         The question may contain information about plotting preferences, but you should ignore that for this prompt and focus only on writing a SQL query to answer the question.
@@ -80,6 +84,7 @@ def build_sql_prompt(question: str, schema_context: str, special_columns=None) -
 
 
 def build_presentation_prompt_df(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
+    """Build a prompt that asks for a structured narrative for tabular output."""
     prompt = f"""
     You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
     Instructions:
@@ -105,12 +110,14 @@ def build_presentation_prompt_df(question: str, schema_context: str, sql_query: 
 
 
 def build_presentation_prompt_short(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
+    """Build a prompt that asks for a concise direct answer for compact results."""
     prompt = f"""
         You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
 
         Instructions:
         - write a short text answer to the user question based on the SQL query and its result.
         - the text should contain a brief non-techical  summary any methodological choices you made in writing the SQL query, such as how you interpreted ambiguous aspects of the question, and any assumptions you made.
+        - Do not use any type of markup (e.g. markdown, html, etc.) in your response. Return plain text only.
         
         BRIEF: <one sentence non-technical description of the results. It should focus on explaining the numbers in the DataFrame.>
         METHODOLOGY: <brief non-technical summary of any methodological choices, assumptions, or interpretations you made in writing the SQL query>
@@ -131,6 +138,9 @@ def build_presentation_prompt_short(question: str, schema_context: str, sql_quer
 
 
 def build_chart_prompt(question: str, sql: str, columns: list[dict], preview_rows: pd.DataFrame) -> str:
+    """
+    Build a prompt that selects an appropriate chart specification for a result DataFrame.
+    """
     return f"""
 You are choosing a chart specification for a pandas DataFrame result.
 
@@ -193,7 +203,9 @@ Preview rows:
 {preview_rows.to_string(index=False)}
 """.strip()
 
-
+"""
+JSON schema used to validate structured chart-selection output from the model.
+"""
 CHART_SCHEMA = {
     "type": "object",
     "properties": {

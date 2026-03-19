@@ -1,3 +1,5 @@
+"""CLI entrypoint for running the analytics agent against the DuckDB dataset."""
+
 from agent import DatabaseAgent
 import duckdb
 import argparse
@@ -7,6 +9,15 @@ import matplotlib.pyplot as plt
 import os
 
 def main(log=print, **kargs):
+    """Execute one agent run for a provided question and handle output artifacts.
+
+    Args:
+        log: Logging callable used throughout execution.
+        kargs: Runtime options including db_path, question, and start_datetime.
+
+    Returns:
+        0 on success, 1 on handled agent error, or None when no question is provided.
+    """
     db_path = kargs.get("db_path", None)
     conn = duckdb.connect(db_path)
     special_columns = [{"table":"customers", "col": "loyalty_tier"},{"table":"orders", "col": "status"}]
