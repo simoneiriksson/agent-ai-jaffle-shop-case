@@ -41,7 +41,7 @@ OPENAI_API_KEY=<key>
 # How to run
 The agent can be run from the command line with commands of the form: 
 ```
-python main --question "Show monthly revenue from completed orders." 
+python app/main.py --question "Show monthly revenue from completed orders." 
 ``` 
 Note that the tool only takes one argument at present.
 
