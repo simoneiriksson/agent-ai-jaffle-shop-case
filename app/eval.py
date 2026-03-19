@@ -1,3 +1,6 @@
+"""
+Curated evaluation suites for SQL correctness, ambiguity handling, and chart-selection behavior.
+"""
 TEST_CASES = [
     {
         "id": "tc_01",
@@ -379,7 +382,7 @@ TEST_CASES3 = [
     },
     {
         "id": "tc_08",
-        "question": "Show sales by channel over time.",
+        "question": "Show sales by channel per month.",
         "category": "ambiguous",
         "type": "table",
         "gold_sql": None,

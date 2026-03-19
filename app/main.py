@@ -7,6 +7,8 @@ import logging
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
+import matplotlib
+#matplotlib.use('Agg')  # Use the Agg backend (non-interactive)
 
 def main(log=print, **kargs):
     """Execute one agent run for a provided question and handle output artifacts.
@@ -32,12 +34,12 @@ def main(log=print, **kargs):
     if response["success"]:
         print(response["text"])
         if response["presentation_type"] == "TABLE" and (response.get("chart", None) is not None):
-            print("Saving and displaying chart...")
             fig, ax = response["chart"]
             fig.savefig(f"output/chart_{kargs['start_datetime']}.png")  # Save the figure to a file
-            plt.show()
+            print(f"Chart saved to output/chart_{kargs['start_datetime']}.png")
+            #plt.show()  # Display the figure
         return 0
-            
+
     else: 
         error_text = f"Encountered an error of type {response.get('error type', 'UNKNOWN')}: {response.get('error text', 'No error text provided.')}"
         log(error_text)

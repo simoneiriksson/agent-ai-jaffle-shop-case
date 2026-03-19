@@ -29,11 +29,14 @@ class DatabaseAgent():
         self.log = log
         self.temperature = temperature 
         api_key=os.environ.get("OPENAI_API_KEY", None)
+        # Fail fast so downstream OpenAI calls never run with missing credentials.
         if api_key is None:
             raise ValueError("OPENAI_API_KEY environment variable not set.")
+        # Reuse one authenticated client across all model calls in this agent instance.
         self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
         if special_columns:
+            # Preload distinct values for semantic columns so SQL prompt grounding is stronger.
             self.special_columns = self.get_special_columns_content(special_columns)  
         else: self.special_columns = None
 
@@ -50,6 +53,7 @@ class DatabaseAgent():
         except Exception as e:
             self.log(f"Error getting LLM response: {e}")
             print(f"Error getting LLM response: {e}")
+            # Stop immediately so callers never receive a partial/undefined response.
             exit(1)
         return response.choices[0].message.content
 
@@ -82,6 +86,7 @@ class DatabaseAgent():
         except Exception as e:
             self.log(f"Error getting LLM response: {e}")
             print(f"Error getting LLM response: {e}")
+            # Keep failure behavior aligned with get_llm_response.
             exit(1)
 
         try:
@@ -115,6 +120,7 @@ class DatabaseAgent():
             Dictionary containing success status and either query/data or structured error details.
         """
         sql_query = self.get_llm_response(prompt)
+        # The prompt contract allows sentinel prefixes when the question is unclear or impossible.
         if sql_query.upper().startswith("AMBIGUOUS"):
             self.log(f"Generated SQL query is ambiguous. returning: {sql_query}")
             return {"success": False, "error type": "AMBIGUOUS", "error text": sql_query}
@@ -124,6 +130,7 @@ class DatabaseAgent():
             return {"success": False, "error type": "UNANSWERABLE", "error text": sql_query}
 
         if not is_safe_select(sql_query):
+            # Enforce read-only SQL to avoid accidental or malicious data mutation.
             self.log("Generated SQL query is not a safe SELECT statement.")
             return {"success": False, "error type": "UNSAFE", "error text": sql_query}
 
@@ -152,9 +159,12 @@ class DatabaseAgent():
         self.log("SQL query executed successfully. Processing results...")
 
         sql_query = sql_response_dict["sql_query"]
+    # Normalize labels once so text, table, and chart outputs use the same names.
         query_result = rename_columns_human(sql_response_dict["query_result"])
+        # Keep both column names and dtypes for chart planning in the next LLM step.
         result_columns_and_DT_dict = {col: str(dtype) for col, dtype in zip(query_result.columns, query_result.dtypes)}
         if len(query_result) == 1:
+            # Single-row outputs read better as narrative text; multi-row outputs are shown as tables.
             presentation_type = "PRESENTATION: TEXT"
         else: presentation_type = "PRESENTATION: TABLE"
         self.log(f"Determined presentation type: {presentation_type}")
@@ -172,12 +182,15 @@ class DatabaseAgent():
         elif presentation_type == "PRESENTATION: TABLE":
             df_presentation_prompt = build_presentation_prompt_df(question, self.schema_summary, sql_query, query_result.head(n=100))
             df_intro_text = self.get_llm_response(df_presentation_prompt)
+            # Pair a short narrative with a plain-text table for terminal readability.
             text_output = f"{df_intro_text}\n\n{query_result.to_string(index=False)}"
             self.log("Table Output:")
             self.log(text_output)
             chart_prompt = build_chart_prompt(question=question, sql=sql_query, columns=result_columns_and_DT_dict, preview_rows=query_result.head(n=5))
+            # Use a small preview to reduce token usage while preserving chart intent.
             chart_response_dict = self.get_llm_response_jsonschema(chart_prompt, json_schema=CHART_SCHEMA)
             fig, ax = build_plot(chart_response_dict, query_result, log=self.log)
+            # Close pyplot state to avoid duplicate renders and figure buildup.
             plt.close(fig)
             return {"success": True, 
                     "presentation_type": "TABLE", 

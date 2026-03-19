@@ -4,11 +4,11 @@ import pandas as pd
 def build_sql_prompt_bck(question, schema_context):
     """Legacy SQL prompt template kept for comparison/backward reference."""
     prompt = f"""You are an expert data analyst who writes SQL queries to answer questions about a database. 
-    The database schema is as follows:
-{schema_context}
-Write a SQL query to answer the following question:
-{question}
-Only write the SQL query, without any explanation."""
+        The database schema is as follows:
+        {schema_context}
+        Write a SQL query to answer the following question:
+        {question}
+        Only write the SQL query, without any explanation."""
     return prompt
 
 
@@ -142,66 +142,66 @@ def build_chart_prompt(question: str, sql: str, columns: list[dict], preview_row
     Build a prompt that selects an appropriate chart specification for a result DataFrame.
     """
     return f"""
-You are choosing a chart specification for a pandas DataFrame result.
+        You are choosing a chart specification for a pandas DataFrame result.
 
-Your task:
-Select the best chart type for the result and return a JSON object only.
+        Your task:
+        Select the best chart type for the result and return a JSON object only.
 
-Allowed chart types:
-- "none"
-- "line"
-- "line_grouped"
-- "bar"
-- "grouped_bar"
-- "stacked_bar"
+        Allowed chart types:
+        - "none"
+        - "line"
+        - "line_grouped"
+        - "bar"
+        - "grouped_bar"
+        - "stacked_bar"
 
-Chart rules:
-- Use "none" if the result is not meaningfully chartable.
-- Use "line" for ordered or time-like x values, with one or more numeric y series.
-- Use "line_grouped" for line charts with a grouping variable to split into multiple lines.
-- Use "bar" for one categorical x and one numeric y.
-- Use "grouped_bar" for one primary x, one grouping column, and one numeric y.
-- Use "stacked_bar" for one primary x, one grouping column, and one numeric y.
-- Only use columns that appear in the provided DataFrame schema.
-- Do not invent columns.
-- Do not return code.
-- Do not return markdown.
-- Return valid JSON only.
-- Return only the JSON, without any explanation or additional text.
-- Your response must begin with '{' and end with '}'.
+        Chart rules:
+        - Use "none" if the result is not meaningfully chartable.
+        - Use "line" for ordered or time-like x values, with one or more numeric y series.
+        - Use "line_grouped" for line charts with a grouping variable to split into multiple lines.
+        - Use "bar" for one categorical x and one numeric y.
+        - Use "grouped_bar" for one primary x, one grouping column, and one numeric y.
+        - Use "stacked_bar" for one primary x, one grouping column, and one numeric y.
+        - Only use columns that appear in the provided DataFrame schema.
+        - Do not invent columns.
+        - Do not return code.
+        - Do not return markdown.
+        - Return valid JSON only.
+        - Return only the JSON, without any explanation or additional text.
+        - Your response must begin with '{' and end with '}'.
 
-JSON schema:
-{{
-  "chart_type": "none | line | line_grouped | bar | grouped_bar | stacked_bar",
-  "x": "string or null",
-  "y": "string, array of strings, or null",
-  "group": "string or null",
-  "title": "string",
-  "xlabel": "string",
-  "ylabel": "string",
-  "reason": "string"
-}}
+        JSON schema:
+        {{
+        "chart_type": "none | line | line_grouped | bar | grouped_bar | stacked_bar",
+        "x": "string or null",
+        "y": "string, array of strings, or null",
+        "group": "string or null",
+        "title": "string",
+        "xlabel": "string",
+        "ylabel": "string",
+        "reason": "string"
+        }}
 
-Additional constraints:
-- For "line": x must be a single column, y must be an array of one or more numeric columns.
-- For "line_grouped": x must be a single column, y must be an array of one or more numeric columns, group must be a single column.
-- For "bar": x must be a single column, y must be a single numeric column.
-- For "grouped_bar": x must be a single column, group must be a single column, y must be a single numeric column.
-- For "stacked_bar": x must be a single column, group must be a single column, y must be a single numeric column.
-- For "none": set x, y, group, and stack to null.
+        Additional constraints:
+        - For "line": x must be a single column, y must be an array of one or more numeric columns.
+        - For "line_grouped": x must be a single column, y must be an array of one or more numeric columns, group must be a single column.
+        - For "bar": x must be a single column, y must be a single numeric column.
+        - For "grouped_bar": x must be a single column, group must be a single column, y must be a single numeric column.
+        - For "stacked_bar": x must be a single column, group must be a single column, y must be a single numeric column.
+        - For "none": set x, y, group, and stack to null.
 
-User question:
-{question}
+        User question:
+        {question}
 
-SQL used to produce the result:
-{sql}
+        SQL used to produce the result:
+        {sql}
 
-DataFrame columns and dtypes:
-{columns}
+        DataFrame columns and dtypes:
+        {columns}
 
-Preview rows:
-{preview_rows.to_string(index=False)}
-""".strip()
+        Preview rows:
+        {preview_rows.to_string(index=False)}
+        """.strip()
 
 """
 JSON schema used to validate structured chart-selection output from the model.
