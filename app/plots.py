@@ -38,13 +38,9 @@ def build_plot(chart_output_dict, result, log=print):
             group_labels = sorted(result[chart_output_dict["group"]].unique().tolist())
             group_pos = np.arange(len(group_labels))
             xs = sorted(result[chart_output_dict["x"]].unique().tolist())
-            #print("group_labels", group_labels)
-            #print("xs", xs)
             for i, x in enumerate(xs):
                 x_data = result[result[chart_output_dict["x"]] == x]
-                #print("x_data", x_data)
                 ax.bar(group_pos + i*0.2, x_data[chart_output_dict["y"]], width=0.2, label=str(x))
-            #ax.set_xlabel(group_labels)
             ax.set_ylabel(chart_output_dict["ylabel"])
             ax.set_title(chart_output_dict["title"])
             ax.set_xticks(group_pos + 0.2)
