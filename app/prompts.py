@@ -110,7 +110,7 @@ def build_presentation_prompt_df(question: str, schema_context: str, sql_query: 
 
 
 def build_presentation_prompt_short(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
-    """Build a prompt that asks for a concise direct answer for compact results."""
+    """Build a prompt that asks brief narrative for single-value output, with a focus on methodological transparency."""
     prompt = f"""
         You are a data analyst, and you have just executed the following SQL query against a DuckDB database.
 
@@ -204,7 +204,7 @@ def build_chart_prompt(question: str, sql: str, columns: list[dict], preview_row
         """.strip()
 
 """
-JSON schema used to validate structured chart-selection output from the model.
+JSON schema for restricted JSON output.
 """
 CHART_SCHEMA = {
     "type": "object",

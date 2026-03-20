@@ -22,6 +22,12 @@ class DatabaseAgent():
             Initialize the agent with a DuckDB connection, logging callable, optional special
             semantic columns, and generation temperature.
 
+            Args:
+            conn: Active database connection object.
+            log: Callable for logging messages (default: print).
+            special_columns: Optional list of columns with special semantics to enhance prompt grounding.
+            temperature: Sampling temperature for LLM responses (default: 1).
+            
             Raises:
             ValueError: If OPENAI_API_KEY is not set in the environment.
         """
