@@ -1,6 +1,8 @@
 # Jaffle Shop Database AI-agent
 
-This repo showcase an AI agent that allows non-technical users to query the Jaffle Shop with business questions in natural language. The agent uses API-calls to OpenAI, and requires an API-key (see below).
+This repo showcase an AI agent that allows non-technical users to query the Jaffle Shop with business questions in natural language. 
+
+The agent uses API-calls to OpenAI GPT-4.1 for SQL generation, and chart selection, and requires an API-key to OpenAI (see below).
 
 # Repository overview
 The repository has the following structure:
@@ -23,7 +25,10 @@ pyne-ai-case/
 └── data/
     └── jaffle_shop.duckdb
 ```
-The presentation notebook contains a walk-through of 
+There are two notebooks in the repository: `presentation.ipynb` and `eval.ipynb`. The presentation notebook gives a walk-through of the agent class and show the intermediate steps and outputs. The evaluation notebook contains a simple evaluation script, as explained below.
+
+The core agent code is placed in the class `DatabaseAgent` in `agent.py`. The main method in this class is the `__call__` class that runs a question through the agent. 
+Prompt definitions are found in `prompts.py`, and the plotting functionality is in `plots.py`
 
 # Setup
 In order to run the agent, you should first create a local environment, then activate it and finally install the prerequisite packages. You do this with the following series of commands:
@@ -128,10 +133,15 @@ This could be enhanced with letting an LLM evaluate the entire agent output (SQL
 Furthermore, 10 test cases are far too few for a comprehensive test.
 
 ## Design decisions and trade-offs
-I chose a simple notebook-first Python setup to keep the system easy to inspect, explain, and evaluate. The overall design is a single linear pipeline—question → SQL generation → validation → execution → answer/plotting—rather than a more complex multi-agent system. I also prioritized guardrails over breadth: the agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only SQL. For the additional capability, I chose plotting because it adds clear business value without adding much architectural complexity.
+- I chose a simple notebook-first Python setup to keep the system easy to inspect, explain, and evaluate. 
+- The overall design is a single linear pipeline—question → SQL generation → validation → execution → answer/plotting—rather than a more complex multi-agent system. 
+- I also prioritized guardrails over breadth: the agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only 
+- SQL. For the additional capability, I chose plotting because it adds clear business value without adding much architectural complexity.
 
 ## Limitations
-The system still depends on LLM quality, so SQL generation and plot selection can fail on edge cases. The SQL safety layer is lightweight and not equivalent to production-grade validation or governance. Plotting is intentionally constrained to a small set of supported chart types, so some valid outputs are better shown as tables. The evaluation is useful as a first check, but the test set is still too small to make strong claims about overall robustness.
+- The system still depends on LLM quality, so SQL generation and plot selection can fail on edge cases. 
+- The SQL safety layer is lightweight and not equivalent to production-grade validation or governance. Plotting is intentionally constrained to a small set of supported chart types, so some valid outputs are better shown as tables. 
+- The evaluation is useful as a first check, but the test set is still too small to make strong claims about overall robustness.
 
 # Future improvements
 With more time, it would be good idea to consider implementing the following:
