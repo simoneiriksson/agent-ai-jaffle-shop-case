@@ -138,6 +138,7 @@ Furthermore, 10 test cases are far too few for a comprehensive test.
 - The overall design is a single linear pipeline—question → SQL generation → validation → execution → answer/plotting—rather than a more complex multi-agent system. 
 - The agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only SQL. 
 - For the additional capability, I chose a plotting feature because it adds clear business value without adding much architectural complexity.
+- I added comprehensive optional logging. When running the CLI version, logs are saved to the `logs` folder. When running in notebook, it is recommended to use a null-logger or direct logging to `print`
 
 ## Limitations
 - The system still depends on LLM quality, so SQL generation and plot selection can fail on edge cases. 
