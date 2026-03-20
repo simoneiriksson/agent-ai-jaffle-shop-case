@@ -133,23 +133,24 @@ This could be enhanced with letting an LLM evaluate the entire agent output (SQL
 Furthermore, 10 test cases are far too few for a comprehensive test.
 
 ## Design decisions and trade-offs
+- The LLM is tasked with generating an SQL-query, where key-columns are removed. Furthermore, I have added deterministic translation of column names into natural language after processing the SQL.
 - I chose a simple notebook-first Python setup to keep the system easy to inspect, explain, and evaluate. 
 - The overall design is a single linear pipeline—question → SQL generation → validation → execution → answer/plotting—rather than a more complex multi-agent system. 
-- I also prioritized guardrails over breadth: the agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only 
-- SQL. For the additional capability, I chose plotting because it adds clear business value without adding much architectural complexity.
+- The agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only SQL. 
+- For the additional capability, I chose a plotting feature because it adds clear business value without adding much architectural complexity.
 
 ## Limitations
 - The system still depends on LLM quality, so SQL generation and plot selection can fail on edge cases. 
-- The SQL safety layer is lightweight and not equivalent to production-grade validation or governance. Plotting is intentionally constrained to a small set of supported chart types, so some valid outputs are better shown as tables. 
-- The evaluation is useful as a first check, but the test set is still too small to make strong claims about overall robustness.
+- The SQL safety layer is lightweight and not equivalent to production-grade validation or governance. Plotting is intentionally constrained to a small set of supported chart types, so some valid outputs are better shown as tables. The evaluation is useful as a first check, but the test set is still too small to make strong claims about overall robustness.
+- The plotting capabilities are a bit limited now. Either another framework could be developed or the current could be extended.
 
 # Future improvements
 With more time, it would be good idea to consider implementing the following:
 - Add an SQL dry-run and in case of error, get the LLM to make a revised SQL.
 - Add a generate → critisize → revise loop on the SQL generation to avoid wrongful, but executable SQL.
 - If this should go into production somewhere, I would probably not run it on a user with writing permission to the DB. This would in turn render the SQL-guardrails redundant. 
-
-With regard to evaluation, it is recommended to implement an LLM-based evaluation, that takes the question, the SQL-query, the Dataframe, and the natural language report and evaluate if it is all coherent.
+- With regard to evaluation, it is recommended to implement an LLM-based evaluation, that takes the question, the SQL-query, the Dataframe, and the natural language report and evaluate if it is all coherent.
+- Improve plotting framework.
 
 
 
