@@ -16,17 +16,6 @@ def get_connection(db_path=None):
         raise ValueError("Database path must be provided.")
     return duckdb.connect(db_path)
 
-def get_schema_summary_(conn) -> str:
-    """Build a compact schema summary in table(column1, column2, ...) format."""
-    tables = conn.execute("SHOW TABLES").fetchall()
-    lines = []
-    for (table_name,) in tables:
-        cols = conn.execute(f"DESCRIBE {table_name}").fetchall()
-        col_names = [c[0] for c in cols]
-        lines.append(f"{table_name}({', '.join(col_names)})")
-    return "\n".join(lines)
-
-
 def get_schema_summary(conn) -> str:
     """Build a detailed schema summary listing each table and column data type."""
     tables = conn.execute("SHOW TABLES").fetchall()
