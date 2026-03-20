@@ -1,15 +1,6 @@
 """Prompt builders for SQL generation, result presentation, and chart selection."""
 
 import pandas as pd
-def build_sql_prompt_bck(question, schema_context):
-    """Legacy SQL prompt template kept for comparison/backward reference."""
-    prompt = f"""You are an expert data analyst who writes SQL queries to answer questions about a database. 
-        The database schema is as follows:
-        {schema_context}
-        Write a SQL query to answer the following question:
-        {question}
-        Only write the SQL query, without any explanation."""
-    return prompt
 
 
 def build_sql_prompt(question: str, schema_context: str, special_columns=None) -> str:
@@ -41,6 +32,15 @@ def build_sql_prompt(question: str, schema_context: str, special_columns=None) -
         """.strip()
     return prompt
 
+# def build_sql_prompt_bck(question, schema_context):
+#     """Legacy SQL prompt template kept for comparison/backward reference."""
+#     prompt = f"""You are an expert data analyst who writes SQL queries to answer questions about a database. 
+#         The database schema is as follows:
+#         {schema_context}
+#         Write a SQL query to answer the following question:
+#         {question}
+#         Only write the SQL query, without any explanation."""
+#     return prompt
 
 # def build_presentation_type_prompt(question: str, schema_context: str, sql_query: str, db_extract: pd.DataFrame) -> str:
 #     prompt = f"""
