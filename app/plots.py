@@ -29,6 +29,7 @@ def build_plot(chart_output_dict, result, log=print):
             ax.set_title(chart_output_dict["title"])
             ax.set_xticks(x_pos)
             ax.set_xticklabels(x_ticks, rotation=45, ha="right")
+            fig.tight_layout()
             return fig, ax
 
         case "grouped_bar":   
@@ -46,6 +47,7 @@ def build_plot(chart_output_dict, result, log=print):
             ax.set_xticks(group_pos + 0.2)
             ax.set_xticklabels(group_labels, rotation=45, ha="right")
             ax.legend()
+            fig.tight_layout()
             return fig, ax
 
         case "wacked_bar": # dropped. Looks aweful and I don't want to deal with the edge cases that will come with it.
@@ -66,6 +68,7 @@ def build_plot(chart_output_dict, result, log=print):
             ax.set_xticks(x_pos)
             ax.set_xticklabels(xs, rotation=45, ha="right")
             ax.legend()
+            fig.tight_layout()
             return fig, ax
 
         case "stacked_bar":
@@ -85,6 +88,7 @@ def build_plot(chart_output_dict, result, log=print):
             ax.set_xticks(group_pos)
             ax.set_xticklabels(group_labels, rotation=45, ha="right")
             ax.legend()
+            fig.tight_layout()
             return fig, ax
             
         case "line":
@@ -96,6 +100,7 @@ def build_plot(chart_output_dict, result, log=print):
             ax.set_ylabel(chart_output_dict["ylabel"])
             ax.set_title(chart_output_dict["title"])
             ax.tick_params(axis='x', rotation=45)
+            fig.tight_layout()
             return fig, ax
 
         case "line_grouped":
@@ -111,6 +116,7 @@ def build_plot(chart_output_dict, result, log=print):
             ax.set_title(chart_output_dict["title"])
             ax.tick_params(axis='x', rotation=45)
             ax.legend()
+            fig.tight_layout()
             return fig, ax
 
         case "none":

@@ -46,13 +46,37 @@ OPENAI_API_KEY=<key>
 # How to run
 The agent can be run from the command line with commands of the form: 
 ```
-python app/main.py --question "Show monthly revenue from completed orders." 
+python app/main.py --question "What are the top 10 products by revenue?" 
 ``` 
 Note that the tool only takes one argument at present.
 
 This command creates a logging folder (`logs`) and an output folder (`output`) and prints the resulting answer. If the query result in a plot, it is put in the output folder. The log contains records of the question and intermediate results.
 
 There is also a notebook, which walks through the agents steps, and show the intermediate outputs.
+
+If everything works correct, the app will respond with something in the line of: 
+```
+BRIEF: The top 10 products by revenue have been identified, with the Spicy Beef Jaffle leading in sales.
+
+IN-DEPTH: The Spicy Beef Jaffle is the top revenue-generating product, earning a total of 5984.0. It is followed closely by the BBQ Chicken Jaffle, which brought in 5785.5. The Mushroom & Brie Jaffle and Veggie Jaffle also performed strongly, with revenues of 5410.0 and 5184.0, respectively. The top 10 list is predominantly comprised of different jaffle varieties, indicating their popularity, alongside some other items like Sweet Potato Fries and Chocolate Brownies. Interestingly, the differences in revenue among the top items are not vast, showcasing a competitive mix within this product lineup.
+
+METHODOLOGY: The SQL query was designed to calculate total revenue for each product by summing the line totals from order items and subsequently joining those results with product details. The query groups the data by product names and orders the results in descending order of total revenue, limiting the final output to the top 10 products.
+
+          Product Name  Total Revenue
+     Spicy Beef Jaffle         5984.0
+    BBQ Chicken Jaffle         5785.5
+Mushroom & Brie Jaffle         5410.0
+         Veggie Jaffle         5184.0
+      Breakfast Jaffle         5130.0
+        Classic Jaffle         4547.5
+    Sweet Potato Fries         3261.5
+     Chocolate Brownie         3150.0
+          Banana Bread         3107.5
+            Iced Latte         3102.0
+Chart saved to output/chart_2026-03-24_09-13-46.png
+```
+And a plot similar to this
+![Product by revenue barchart](assets/chart_products_by_revenue.png)
 
 
 # Additional capability
@@ -134,11 +158,11 @@ Furthermore, 10 test cases are far too few for a comprehensive test.
 
 ## Design decisions and trade-offs
 - The LLM is tasked with generating an SQL-query, where key-columns are removed. Furthermore, I have added deterministic translation of column names into natural language after processing the SQL.
+- The agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only SQL.
+- For the additional capability, I chose a plotting feature because it adds clear business value without adding much architectural complexity.
 - I chose a simple notebook-first Python setup to keep the system easy to inspect, explain, and evaluate. 
 - The overall design is a single linear pipeline—question → SQL generation → validation → execution → answer/plotting—rather than a more complex multi-agent system. 
-- The agent explicitly handles ambiguous and unanswerable questions, and only allows safe read-only SQL. 
-- For the additional capability, I chose a plotting feature because it adds clear business value without adding much architectural complexity.
-- I added comprehensive optional logging. When running the CLI version, logs are saved to the `logs` folder. When running in notebook, it is recommended to use a null-logger or direct logging to `print`
+- I added comprehensive optional logging. When running the CLI version, logs are saved to the `logs` folder. When running in notebook, it is recommended to use a null-logger or direct logging to `print`.
 
 ## Limitations
 - The system still depends on LLM quality, so SQL generation and plot selection can fail on edge cases. 
